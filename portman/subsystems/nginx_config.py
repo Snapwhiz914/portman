@@ -17,14 +17,17 @@ def get_bind_ip():
     return sn
 
 def generate_stream_block(port):
-    return nginx.Server().add(
+    srv = nginx.Server()
+    srv.add(
         nginx.Key("listen", get_bind_ip() + ":" + str(port) + " udp"),
         nginx.Key("listen", get_bind_ip() + ":" + str(port)),
         nginx.Key("proxy_pass", "127.0.0.1:" + str(port))
     )
+    return srv
 
 def generate_ssl_block(port, cert_file_loc):
-    return nginx.Server().add(
+    srv = nginx.Server()
+    srv.add(
         nginx.Key("server_name", "res-no1.asilvers.com"),
         nginx.Location("/", 
             nginx.Key("proxy_pass", "http://127.0.0.1:" + str(port)),
@@ -53,6 +56,7 @@ def generate_ssl_block(port, cert_file_loc):
         nginx.Key("include", "/etc/letsencrypt/options-ssl-nginx.conf"),
         nginx.Key("ssl_dhparam", "/etc/letsencrypt/ssl-dhparams.pem")
     )
+    return srv
 
 class NginxConfig():
     def __init__(self, config_file_loc, cert_file_loc, hostname):
