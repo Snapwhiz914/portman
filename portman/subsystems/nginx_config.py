@@ -28,6 +28,7 @@ def generate_stream_block(port):
 def generate_ssl_block(port, cert_file_loc):
     srv = nginx.Server()
     srv.add(
+        nginx.Key("listen", get_bind_ip() + ":" + str("port") + " ssl"),
         nginx.Key("server_name", "res-no1.asilvers.com"),
         nginx.Location("/", 
             nginx.Key("proxy_pass", "http://127.0.0.1:" + str(port)),
@@ -50,7 +51,6 @@ def generate_ssl_block(port, cert_file_loc):
             nginx.Key("keepalive_timeout", "64800"),
             nginx.Key("send_timeout", "64800"),
         ),
-        nginx.Key("listen", get_bind_ip() + ":" + str("port") + " ssl"),
         nginx.Key("ssl_certificate", os.path.join(cert_file_loc, "fullchain.pem")),
         nginx.Key("ssl_certificate_key", os.path.join(cert_file_loc, "privkey.pem")),
         nginx.Key("include", "/etc/letsencrypt/options-ssl-nginx.conf"),
@@ -68,7 +68,7 @@ class NginxConfig():
     
     def _does_server_exist(self, port):
         for server in self.top_level.children:
-            if str(port) == server.children.filter("listen")[0].value.split(" ")[0]: return True
+            if str(port) == server.children[0].value.split(" ")[0]: return True
         return False
     
     def add_stream(self, port, ssl):
@@ -81,7 +81,7 @@ class NginxConfig():
     def close_stream(self, port):
         if not self._does_server_exist(port): raise Exception("Server for port " + str(port) + " does not exist")
         for server in self.top_level.children:
-            if str(port) == server.children.filter("listen")[0].value.split(" ")[0]:
+            if str(port) == server.children[0].value.split(" ")[0]:
                 self.top_level.remove(server)
     
     def save(self):
