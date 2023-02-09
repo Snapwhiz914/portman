@@ -1,4 +1,6 @@
 import nginx
+import socket
+import os
 
 #Expected nginx config file pattern:
 #stream {
@@ -7,18 +9,25 @@ import nginx
 #    server{}
 #}
 
+def get_bind_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    sn = s.getsockname()[0]
+    s.close()
+    return sn
+
 def generate_stream_block(port):
     return nginx.Server().add(
-        nginx.Key("listen", str(port) + " udp"),
-        nginx.Key("listen", str(port)),
-        nginx.Key("proxy_pass", "localhost:" + str(port))
+        nginx.Key("listen", get_bind_ip() + ":" + str(port) + " udp"),
+        nginx.Key("listen", get_bind_ip() + ":" + str(port)),
+        nginx.Key("proxy_pass", "127.0.0.1:" + str(port))
     )
 
 def generate_ssl_block(port, cert_file_loc):
     return nginx.Server().add(
         nginx.Key("server_name", "res-no1.asilvers.com"),
         nginx.Location("/", 
-            nginx.Key("proxy_pass", "http://localhost:" + str(port)),
+            nginx.Key("proxy_pass", "http://127.0.0.1:" + str(port)),
             nginx.Key("proxy_set_header", "X-Real-IP $remote-addr"),
             nginx.Key("proxy_set_header", "X-Forwarded-For $proxy_add_x_forwarded_for"),
             nginx.Key("proxy_set_header", "X-Forwarded-Host $host:$server_port;"),
@@ -38,9 +47,9 @@ def generate_ssl_block(port, cert_file_loc):
             nginx.Key("keepalive_timeout", "64800"),
             nginx.Key("send_timeout", "64800"),
         ),
-        nginx.Key("listen", str("port") + " ssl"),
-        nginx.Key("ssl_certificate", "/etc/letsencrypt/live/res-no1.asilvers.com/fullchain.pem"),
-        nginx.Key("ssl_certificate_key", "/etc/letsencrypt/live/res-no1.asilvers.com/privkey.pem"),
+        nginx.Key("listen", get_bind_ip() + ":" + str("port") + " ssl"),
+        nginx.Key("ssl_certificate", os.path.join(cert_file_loc, "fullchain.pem")),
+        nginx.Key("ssl_certificate_key", os.path.join(cert_file_loc, "privkey.pem")),
         nginx.Key("include", "/etc/letsencrypt/options-ssl-nginx.conf"),
         nginx.Key("ssl_dhparam", "/etc/letsencrypt/ssl-dhparams.pem")
     )
