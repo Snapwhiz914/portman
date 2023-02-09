@@ -51,7 +51,7 @@ class NginxConfig():
         self.cert_file_loc = cert_file_loc
         self.hostname = hostname
         self.conf = nginx.loadf(self.config_file_loc)
-        self.top_level = self.conf.filter("stream")[0]
+        self.top_level = self.conf.children[0]
     
     def _does_server_exist(self, port):
         for server in self.top_level.servers:
@@ -72,6 +72,6 @@ class NginxConfig():
                 self.top_level.remove(server)
     
     def save(self):
-        self.conf.remove(self.conf.filter("stream")[0])
+        self.conf.remove(self.conf.children[0])
         self.conf.add(self.top_level)
         nginx.dumpf(self.conf, self.config_file_loc)
