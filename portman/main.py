@@ -5,9 +5,9 @@
 # restart nginx
 
 import argparse
-from subsystems import NginxConfig
-from subsystems import Router
-from subsystems import get_config_object
+from .subsystems import NginxConfig
+from .subsystems import Router
+from .subsystems import get_config_object
 import os
 import subprocess
 import sys
@@ -20,7 +20,7 @@ def get_hostname_from_fn(path):
 
 def main():
     ap = argparse.ArgumentParser(
-        prog="Portman",
+        prog="portman",
         usage="Open a port on bgw210 router, add a server block to nginx, and optionally proxy it through ssl"
     )
 
