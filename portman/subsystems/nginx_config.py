@@ -9,8 +9,8 @@ import nginx
 
 def generate_stream_block(port):
     return nginx.Server().add(
-        nginx.Key("listen", port + " udp"),
-        nginx.Key("listen", port),
+        nginx.Key("listen", str(port) + " udp"),
+        nginx.Key("listen", str(port)),
         nginx.Key("proxy_pass", "localhost:" + str(port))
     )
 
