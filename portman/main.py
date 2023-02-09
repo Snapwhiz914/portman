@@ -27,7 +27,7 @@ def main():
     ap.add_argument("port", help="The port you want to open", type=int)
     ap.add_argument("-s", "--ssl", help="Modify the first nginx site config in sites-availble to listen on this port as well (assumes the port you want to open is bound to localhost)", default=False, type=bool)
     ap.add_argument("-c", "--close", help="Add this if you would like to close the port, instead of opening it.", default=False, type=bool)
-    ap.add_argument("-h", "--hostname", help="The hostname to use for the router", default="", type=str)
+    ap.add_argument("-n", "--hostname", help="The hostname to use for the router", default="", type=str)
 
     args = ap.parse_args()
     
