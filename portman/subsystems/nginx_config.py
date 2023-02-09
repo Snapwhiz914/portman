@@ -51,7 +51,6 @@ class NginxConfig():
         self.cert_file_loc = cert_file_loc
         self.hostname = hostname
         self.conf = nginx.loadf(self.config_file_loc)
-        self.conf = nginx.Conf()
         self.top_level = self.conf.filter("stream")[0]
     
     def _does_server_exist(self, port):
@@ -65,3 +64,14 @@ class NginxConfig():
             self.top_level.add(generate_ssl_block(port))
         else:
             self.top_level.add(generate_stream_block(port))
+        
+    def close_stream(self, port):
+        if not self._does_server_exist(port): raise Exception("Server for port " + str(port) + " does not exist")
+        for server in self.top_level.servers:
+            if str(port) == server.children.filter("listen")[0].value.split(" ")[0]:
+                self.top_level.remove(server)
+    
+    def save(self):
+        self.conf.remove(self.conf.filter("stream")[0])
+        self.conf.add(self.top_level)
+        nginx.dumpf(self.conf, self.config_file_loc)

@@ -52,9 +52,27 @@ def main():
                     print("[ROUTER] Opening port...")
                     router.open_port()
         except Exception as e:
-            if not input(f"There was an error trying to open " + str(args["port"]) + ": {e}. Would you like to continue? y for yes").lower() == 'y': sys.exit(1)
+            if not input(f"There was an error trying to open { str(args['port']) }: {e}. Would you like to continue? y for yes").lower() == 'y': sys.exit(1)
         print("Done with router port open, adding nginx config block...")
         ng.add_stream(args["port"], args["ssl"])
+        ng.save()
+        print("Restarting nginx...")
+        subprocess.run("systemctl restart nginx.service", shell=True)
+        print("Done!")
+    else:
+        try:
+            #close a port
+            print("[ROUTER] Ensuring port is open")
+            if router.is_port_open(args["port"]):
+                print("[ROUTER] Closing port")
+                router.close_port(args["port"])
+            else:
+                if not input(f"{ str(args['port']) } is already closed. Would you like to continue? y for yes").lower() == 'y': sys.exit(1)
+        except:
+            if not input(f"There was an error trying to close { str(args['port']) }: {e}. Would you like to continue? y for yes").lower() == 'y': sys.exit(1)
+        print("Done with router port close, deleting nginx config block...")
+        ng.close_stream(args["port"])
+        ng.save()
         print("Restarting nginx...")
         subprocess.run("systemctl restart nginx.service", shell=True)
         print("Done!")
