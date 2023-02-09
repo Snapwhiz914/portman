@@ -19,7 +19,6 @@ fi
 #Create a config file
 CONFIG_TEMPLATE=$'access_code: <insert_ac_here>
 router_ip: 192.168.1.254
-server: imap.server.com
 nginx_site_loc: /etc/nginx/sites-available/default
 cert_loc: /etc/certbot/'
 
