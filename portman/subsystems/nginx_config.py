@@ -54,7 +54,7 @@ class NginxConfig():
         self.top_level = self.conf.children[0]
     
     def _does_server_exist(self, port):
-        for server in self.top_level.servers:
+        for server in self.top_level.children:
             if str(port) == server.children.filter("listen")[0].value.split(" ")[0]: return True
         return False
     
@@ -67,7 +67,7 @@ class NginxConfig():
         
     def close_stream(self, port):
         if not self._does_server_exist(port): raise Exception("Server for port " + str(port) + " does not exist")
-        for server in self.top_level.servers:
+        for server in self.top_level.children:
             if str(port) == server.children.filter("listen")[0].value.split(" ")[0]:
                 self.top_level.remove(server)
     
