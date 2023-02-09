@@ -6,12 +6,11 @@ import os
 import datetime
 import pandas
 import socket
-#from pynput import keyboard
-#keyboard.KeyCode.from_char("")
 
 class Router:
-    def __init__(self, access_code, ip):
+    def __init__(self, access_code, ip, hn=""):
         self.access_code = access_code
+        self.hn = hn
         self.sess = requests.Session()
         self.addr = "http://" + ip
         self.sess_id = self._get_sess_id_from_file()
@@ -111,7 +110,7 @@ class Router:
         return df["Ports"].isin(["TCP/UDP: " + str(port)]).any()
 
     def _get_mac_addr_of_dev_from_page(self, page_html):
-        hn = socket.gethostname()
+        hn = self.hn if self.hn != "" else socket.gethostname()
         host_dev_table = page_html.find("select", {"id": "hostdevice"})
         mac_addr = ""
         for option in host_dev_table.findChildren("option"):
@@ -151,17 +150,3 @@ class Router:
             "device": self._get_mac_addr_of_dev_from_page(page_html)
         }, allow_redirects=False)
         if res.status_code != 302: raise Exception("Close port ended in invalid status code: " + str(res.status_code) + " (should be 302)")
-
-if __name__ == '__main__':
-    r = Router("77129/04=@", "192.168.1.254")
-    port_to_open_for_me = 53
-    r.login()
-    print("Checking if service exists")
-    if not r.port_service_exsits(port_to_open_for_me):
-        print("Port service does not exist, making one")
-        r.create_port_service(port_to_open_for_me)
-    print("Service def exists, now opening port")
-    if not r.is_port_open(port_to_open_for_me):
-        print("Port is not already open, opening it...")
-        r.open_port(port_to_open_for_me)
-        print("Port is now open")
